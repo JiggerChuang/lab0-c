@@ -16,8 +16,10 @@ struct list_head *q_new()
 {
     struct list_head *new =
         (struct list_head *) malloc(sizeof(struct list_head));
-    if (!new)
+    if (!new) {
+        free(new);
         return NULL;
+    }
 
     INIT_LIST_HEAD(new);
     return new;
@@ -26,31 +28,91 @@ struct list_head *q_new()
 /* Free all storage used by queue */
 void q_free(struct list_head *l)
 {
+    struct list_head *node, *safe;
+
+    list_for_each_safe (node, safe, l) {
+        element_t *tmp = list_entry(node, element_t, list);
+        q_release_element(tmp);
+    }
+
     free(l);
 }
 
 /* Insert an element at head of queue */
 bool q_insert_head(struct list_head *head, char *s)
 {
+    if (!s || !head)
+        return false;
+
+    element_t *new = (element_t *) malloc(sizeof(element_t));
+    if (!new) {
+        return false;
+    }
+    new->value = (char *) malloc((strlen(s) + 1));
+    if (!new->value) {
+        free(new);
+        return false;
+    }
+    memcpy(new->value, s, strlen(s) + 1);
+
+    list_add(&new->list, head);
+
     return true;
 }
 
 /* Insert an element at tail of queue */
 bool q_insert_tail(struct list_head *head, char *s)
 {
+    if (!s || !head)
+        return false;
+
+    element_t *new = (element_t *) malloc(sizeof(element_t));
+    if (!new) {
+        return false;
+    }
+    new->value = (char *) malloc((strlen(s) + 1));
+    if ((!new->value)) {
+        free(new);
+        return false;
+    }
+
+    memcpy(new->value, s, strlen(s) + 1);
+    list_add_tail(&new->list, head);
     return true;
 }
 
 /* Remove an element from head of queue */
 element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
 {
-    return NULL;
+    if (!sp || !head)
+        return NULL;
+
+    element_t *rm_element = list_first_entry(head, element_t, list);
+    if (!rm_element) {
+        return NULL;
+    }
+
+    list_del(&rm_element->list);
+    memcpy(sp, rm_element->value, bufsize);
+
+    return rm_element;
 }
 
 /* Remove an element from tail of queue */
 element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
 {
-    return NULL;
+    if (!sp || !head)
+        return NULL;
+
+    element_t *rm_element = list_last_entry(head, element_t, list);
+    if (!rm_element) {
+        return NULL;
+    }
+
+    list_del(&rm_element->list);
+    memcpy(sp, rm_element->value, bufsize);
+
+    return rm_element;
 }
 
 /* Return number of elements in queue */
