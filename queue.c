@@ -133,6 +133,9 @@ int q_size(struct list_head *head)
 // https://leetcode.com/problems/delete-the-middle-node-of-a-linked-list/
 bool q_delete_mid(struct list_head *head)
 {
+    if (!head)
+        return false;
+
     struct list_head *slow_ptr, *fast_ptr;
     slow_ptr = head->next;
     fast_ptr = head->next;
@@ -152,6 +155,9 @@ bool q_delete_mid(struct list_head *head)
 // https://leetcode.com/problems/remove-duplicates-from-sorted-list-ii/
 bool q_delete_dup(struct list_head *head)
 {
+    if (!head)
+        return false;
+
     struct list_head *curr, *safe;
 
     /* use self-defined loop because I want to change
@@ -199,9 +205,29 @@ bool q_delete_dup(struct list_head *head)
 }
 
 /* Swap every two adjacent nodes */
+// https://leetcode.com/problems/swap-nodes-in-pairs/
 void q_swap(struct list_head *head)
 {
-    // https://leetcode.com/problems/swap-nodes-in-pairs/
+    if (!head)
+        return;
+
+    struct list_head *node, *safe;
+    for (node = (head)->next, safe = node->next;
+         (node != (head) && safe != (head));) {
+        struct list_head *tmp_node = node->prev;
+        node->next = safe->next;
+        node->prev = safe;
+        tmp_node->next = safe;
+
+        struct list_head *tmp_safe = safe->next;
+        safe->next = node;
+        safe->prev = tmp_node;
+        tmp_safe->prev = node;
+
+        /* move curr node to next two nodes */
+        node = node->next;
+        safe = node->next;
+    }
 }
 
 /* Reverse elements in queue */
