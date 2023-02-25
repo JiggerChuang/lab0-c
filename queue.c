@@ -149,9 +149,52 @@ bool q_delete_mid(struct list_head *head)
 }
 
 /* Delete all nodes that have duplicate string */
+// https://leetcode.com/problems/remove-duplicates-from-sorted-list-ii/
 bool q_delete_dup(struct list_head *head)
 {
-    // https://leetcode.com/problems/remove-duplicates-from-sorted-list-ii/
+    struct list_head *curr, *safe;
+
+    /* use self-defined loop because I want to change
+     * the condition node != (head)
+     * to safe != (head)
+     */
+    for (curr = (head)->next, safe = curr->next;
+         (safe != (head) && curr != (head));) {
+        /* If curr->value != safe->value then go to next node */
+        if (strcmp(list_entry(curr, element_t, list)->value,
+                   list_entry(safe, element_t, list)->value)) {
+            curr = safe, safe = curr->next;
+            continue;
+        }
+
+        /* base used for previous curr
+         *  tmp_head used to points to the list node to deleted
+         */
+        struct list_head *base;
+        struct list_head *tmp_head = q_new();
+        tmp_head->next = curr;
+        base = curr->prev;
+        for (; safe != head;) {
+            if (strcmp(list_entry(curr, element_t, list)->value,
+                       list_entry(safe, element_t, list)->value))
+                break;
+
+            safe = safe->next;
+        }
+
+        base->next = safe;
+        safe->prev->next = tmp_head;
+        curr->prev = tmp_head;
+        tmp_head->prev = safe->prev;
+        safe->prev = base;
+
+        curr = base->next;
+        safe = curr->next;
+
+        /* Delete duplicated nodes */
+        q_free(tmp_head);
+    }
+
     return true;
 }
 
