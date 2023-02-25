@@ -84,7 +84,7 @@ bool q_insert_tail(struct list_head *head, char *s)
 /* Remove an element from head of queue */
 element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
 {
-    if (!sp || !head)
+    if (!sp || !head || (q_size(head) == 0))
         return NULL;
 
     element_t *rm_element = list_first_entry(head, element_t, list);
@@ -101,7 +101,7 @@ element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
 /* Remove an element from tail of queue */
 element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
 {
-    if (!sp || !head)
+    if (!sp || !head || (q_size(head) == 0))
         return NULL;
 
     element_t *rm_element = list_last_entry(head, element_t, list);
@@ -231,7 +231,23 @@ void q_swap(struct list_head *head)
 }
 
 /* Reverse elements in queue */
-void q_reverse(struct list_head *head) {}
+void q_reverse(struct list_head *head)
+{
+    if (!head)
+        return;
+
+    struct list_head *node;
+    for (node = (head)->prev; node != (head); node = node->next) {
+        struct list_head *tmp = node->next;
+        node->next = node->prev;
+        node->prev = tmp;
+    }
+
+    /* reverse prev and next of head node */
+    struct list_head *tmp_head = head->next;
+    head->next = head->prev;
+    head->prev = tmp_head;
+}
 
 /* Reverse the nodes of the list k at a time */
 void q_reverseK(struct list_head *head, int k)
