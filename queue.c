@@ -296,8 +296,69 @@ void q_reverseK(struct list_head *head, int k)
     }
 }
 
+void mergeTwoLists(struct list_head *L1, struct list_head *L2)
+{
+    if (!L1 || !L2)
+        return;
+
+    struct list_head *lptr = L1->next;
+    struct list_head *rptr = L2->next;
+    for (; lptr != L1 && rptr != L2;) {
+        /* L1->value > L2->value */
+        if (strcmp(list_entry(lptr, element_t, list)->value,
+                   list_entry(rptr, element_t, list)->value) > 0) {
+            struct list_head *tmp_rptr = rptr->next;
+            list_del(rptr);
+
+            /* prev of lptr points to rptr
+             * next of rptr points to lptr
+             */
+            lptr->prev->next = rptr;
+            rptr->prev = lptr->prev;
+            rptr->next = lptr;
+            lptr->prev = rptr;
+
+            /* rptr move to next node */
+            rptr = tmp_rptr;
+        } else { /* L1->value <= L2->value */
+            lptr = lptr->next;
+        }
+    }
+
+    /* if the iteration of L1 and L2 over
+     * and there are elements in L2 then
+     * splice them to the tail of L1
+     */
+    if (q_size(L2) != 0) {
+        list_splice_tail(L2, L1);
+    }
+}
+
 /* Sort elements of queue in ascending order */
-void q_sort(struct list_head *head) {}
+void q_sort(struct list_head *head)
+{
+    if (!head || q_size(head) == 0 || q_size(head) == 1)
+        return;
+
+    /* middle is the position of list
+     * left stores beginning addr of left part of list
+     * right stores beginning addr of right part of list
+     * */
+    int middle = q_size(head) / 2;
+    LIST_HEAD(right);
+
+    /* get middle node of list */
+    struct list_head *curr = head;
+    for (int i = 0; i < middle; i++)
+        curr = curr->next;
+
+    /* partition into left part and right part */
+    list_cut_position(&right, head, curr);
+
+    q_sort(head);
+    q_sort(&right);
+    mergeTwoLists(head, &right);
+}
 
 /* Remove every node which has a node with a strictly greater value anywhere to
  * the right side of it */
@@ -308,8 +369,8 @@ int q_descend(struct list_head *head)
 }
 
 /* Merge all the queues into one sorted queue, which is in ascending order */
+// https://leetcode.com/problems/merge-k-sorted-lists/
 int q_merge(struct list_head *head)
 {
-    // https://leetcode.com/problems/merge-k-sorted-lists/
     return 0;
 }
